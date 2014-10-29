@@ -22,6 +22,7 @@ public class CellGrid {
 	 * Instantiates a new cell grid.
 	 */
 	public CellGrid() {
+
 	}
 
 	/**
@@ -39,10 +40,10 @@ public class CellGrid {
 	 *
 	 * @param col the col
 	 * @param row the row
-	 * @param cellValue the cell value
+	 * @param cellValue the cell value = Alive
 	 */
 	public void setCellState(int col, int row, boolean cellValue) {
-		//TODO implement
+		this.cells[col][row].setCellState((cellValue ? Cell.Status.Alive : Cell.Status.Dead));
 	}
 
 	/**
@@ -53,8 +54,8 @@ public class CellGrid {
 	 * @return the cell state
 	 */
 	public boolean getCellState(int col, int row) {
-		//TODO implement
-		return false;
+		return this.cells[col][row].getCellState() == Cell.Status.Alive ? true : false;
+		
 	}
 
 	/**
@@ -115,7 +116,34 @@ public class CellGrid {
 	 * Next generation.
 	 */
 	public void nextGeneration() {
-		//TODO implement
+		
+		ArrayList<Cell> newCells = new ArrayList<Cell>();
+		for(int y = 0; y < this.rows; y++)
+		{
+			for(int x = 0; x < this.columns; x++)
+			{
+				int neighbours = this.getAliveNeighboursCount(x, y);
+				if(this.calculateNewCellState(x, y, neighbours)) // isAlive
+				{
+					newCells.add(new Cell(Cell.Status.Alive,x,y));
+				}else{
+					newCells.add(new Cell(Cell.Status.Dead,x,y));
+				}
+				
+			}
+		}
+		
+		
+		this.setGeneration(this.getGeneration()+1);
+		// your code
+		for(Cell object: newCells){
+		  this.setCellState(object.getX(), object.getY(), object.getCellState()  == Cell.Status.Alive ? true : false);
+		}
+		
+		
+		
+		
+		
 	}
 
 	/**
@@ -128,9 +156,9 @@ public class CellGrid {
 	private int getAliveNeighboursCount(int col, int row) {
 		
 		int anz = 0;
-		for (Point p : this.getNeigbours(row, col))
+		for (Point p : this.getNeigbours(col,row))
 		{
-			if(p.x >= 0 && p.y >= 0 && p.x <= this.columns && p.y <= this.rows)
+			if(p.x >= 0 && p.y >= 0 && p.x < this.columns && p.y < this.rows)
 			if(this.isAlive(p.y, p.x))
 				anz++;
 		}
@@ -144,11 +172,27 @@ public class CellGrid {
 	 * @param col the col
 	 * @param row the row
 	 * @param aliveNeighboursCount the alive neighbours count
-	 * @return true, if successful
+	 * @return true, if successful and is alive
 	 */
 	private boolean calculateNewCellState(int col, int row,int aliveNeighboursCount) {
-		//TODO implement
-		return false;
+		boolean isAlive = false;
+		
+		if(this.isAlive(row, col) && aliveNeighboursCount < 2)
+		{
+			isAlive = false;
+		}else if(this.isAlive(row, col) && aliveNeighboursCount > 3)
+		{
+			isAlive = false;
+		}else if(this.isAlive(row, col) && (aliveNeighboursCount == 2 || aliveNeighboursCount == 3))
+		{
+			isAlive = true;
+		}else if(!this.isAlive(row, col) && aliveNeighboursCount == 3)
+		{
+			isAlive = true;
+		}else{
+			isAlive = false;
+		}
+		return isAlive;
 	}
 
 	/**
@@ -162,7 +206,7 @@ public class CellGrid {
 	 * Randomize.
 	 */
 	public void randomize() {
-		//TODO implement fills the grid 
+	
 		Random rand = new Random();
 		for(int x = 0; x < this.columns; x++)
 		{
@@ -190,20 +234,19 @@ public class CellGrid {
 		this.columns = cols;
 		this.rows = rows;
 		
-		cells = new Cell[this.columns][this.rows];
+		this.cells = new Cell[this.columns][this.rows];
+		
 	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		//TODO implement prints the grid 1 = > X  0 = > 0
-		
-		StringBuilder sb = new StringBuilder()
-		;
-		for(int x = 0; x < this.columns; x++)
+		//grid 1 = > X  0 = > 0
+		StringBuilder sb = new StringBuilder();
+		for(int y = 0; y < this.rows; y++)
 		{
-			for(int y = 0; y < this.rows; y++)
+			for(int x = 0; x < this.columns; x++)
 			{
 				
 				if(cells[x][y].getCellState() == Cell.Status.Dead) // tot
@@ -226,9 +269,7 @@ public class CellGrid {
 	 * @return true, if is alive
 	 */
 	public boolean isAlive(int row, int col) {
-		//TODO implement
 		return this.cells[col][row].getCellState() == Cell.Status.Alive;
-	
 	}
 	
 	/**
@@ -239,7 +280,6 @@ public class CellGrid {
 	 * @return the cell
 	 */
 	public Cell getCell(int row, int col){
-		//TODO implement
 		return this.cells[col][row];
 	}
 	
@@ -264,15 +304,17 @@ public class CellGrid {
 		this.setRows(fileGrid.size());
 		this.setGeneration(0);
 
+		this.cells = new Cell[this.getCols()][this.getRows()];
+		
 		for (int i = 0; i < this.getCols(); i++) {
 			for (int j = 0; j < this.getRows(); j++) {
 				String fieldValue = fileGrid.elementAt(j).substring(i, i + 1);
 				boolean state = (fieldValue.equals("X") ? true : false);
-				
-				//TODO implement
+				this.cells[i][j] = new Cell(state? Cell.Status.Alive : Cell.Status.Dead,i,j);
 				
 			}
 		}
+		
 	}
 	
 	/**

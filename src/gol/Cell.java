@@ -37,4 +37,14 @@ public class Cell{
 		this.cellState = cellState;
 	}
 	
+	public int getX()
+	{
+		return this.location.x;
+	}
+	
+	public int getY()
+	{
+		return this.location.y;
+	}
+	
 }
